@@ -1749,3 +1749,112 @@ main.page-main{padding-top:64px;min-height:calc(100vh - 64px);}
 main.page-main .hero{min-height:calc(100vh - 64px);padding-top:80px;}
 .nav-links a.active{color:var(--cyan);}
 @media(max-width:768px){.mobile-menu{top:64px;max-height:calc(100vh - 64px);overflow-y:auto;}}
+
+.home-section-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:24px;
+  margin-top:45px;
+}
+
+.home-section-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(0,245,255,.2);
+  padding:30px;
+  border-radius:20px;
+  transition:.3s ease;
+}
+
+.home-section-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 0 28px rgba(0,245,255,.25);
+}
+
+.home-icon{
+  font-size:2.8rem;
+  margin-bottom:16px;
+}
+
+.home-section-card h3{
+  font-family:'Orbitron',sans-serif;
+  color:#00F5FF;
+  margin-bottom:12px;
+}
+
+.home-section-card p{
+  color:var(--muted);
+  line-height:1.6;
+}
+
+.home-section-card a{
+  display:inline-block;
+  margin-top:18px;
+  color:#ff2d55;
+  text-decoration:none;
+  font-weight:700;
+}
+
+.home-section-card a:hover{
+  color:#00F5FF;
+}
+
+.live-tag,
+.time-tag{
+  display:inline-block;
+  margin-bottom:14px;
+  padding:6px 12px;
+  border-radius:999px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.75rem;
+}
+
+.live-tag{
+  background:rgba(255,45,85,.14);
+  color:#ff2d55;
+  border:1px solid rgba(255,45,85,.4);
+}
+
+.time-tag{
+  background:rgba(0,245,255,.12);
+  color:#00F5FF;
+  border:1px solid rgba(0,245,255,.35);
+}
+
+.home-cta-card{
+  text-align:center;
+  padding:60px 30px;
+  border-radius:24px;
+  border:1px solid rgba(0,245,255,.22);
+  background:linear-gradient(135deg,rgba(0,245,255,.08),rgba(139,0,255,.12));
+  box-shadow:0 0 40px rgba(0,245,255,.12);
+}
+
+.home-cta-card h2{
+  font-size:clamp(2rem,4vw,3.4rem);
+  color:#fff;
+  margin-bottom:18px;
+}
+
+.home-cta-card p{
+  max-width:720px;
+  margin:0 auto 28px;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+.cyan{color:#00F5FF;}
+.red{color:#ff2d55;}
+
+@media(max-width:768px){
+  .home-section-grid{
+    grid-template-columns:1fr;
+  }
+
+  .home-section-card{
+    padding:24px;
+  }
+
+  .home-cta-card{
+    padding:40px 20px;
+  }
+}
