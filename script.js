@@ -1,157 +1,191 @@
-
 /* ==========================================================
-   HAMBURGER MENU
+   GLOBAL BUTTON + MENU FIXES
+   - No JavaScript errors when an element is missing
+   - Sign Up / Create Account buttons open signup.html
+   - Login modal still works where the modal exists
 ========================================================== */
-const hamburger = document.getElementById('hamburger');
-const mobileMenu = document.getElementById('mobileMenu');
-if (hamburger && mobileMenu) hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  mobileMenu.classList.toggle('open');
-});
-if (mobileMenu) mobileMenu.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    mobileMenu.classList.remove('open');
-  });
-});
+document.addEventListener('DOMContentLoaded', () => {
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => document.querySelectorAll(selector);
 
-/* ==========================================================
-   AUTH MODAL
-========================================================== */
-const overlay   = document.getElementById('authOverlay');
-const authModal = document.getElementById('authModal');
+  const hamburger = $('#hamburger');
+  const mobileMenu = $('#mobileMenu');
+  const overlay = $('#authOverlay');
 
-function openModal(tab) {
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTab(tab);
-}
-function closeModal() {
-  overlay.classList.remove('open');
-  document.body.style.overflow = '';
-}
+  function closeMobileMenu() {
+    if (hamburger) hamburger.classList.remove('open', 'active', 'show');
+    if (mobileMenu) mobileMenu.classList.remove('open', 'active', 'show');
+    document.body.classList.remove('menu-open');
+  }
 
-// Open triggers
-document.getElementById('openLogin').addEventListener('click', () => openModal('login'));
-document.getElementById('openSignup').addEventListener('click', () => openModal('signup'));
-document.getElementById('openLoginMobile').addEventListener('click', () => { openModal('login'); mobileMenu.classList.remove('open'); hamburger.classList.remove('open'); });
-document.getElementById('openSignupMobile').addEventListener('click', () => { openModal('signup'); mobileMenu.classList.remove('open'); hamburger.classList.remove('open'); });
+  function goSignup() {
+    closeMobileMenu();
+    window.location.href = 'signup.html';
+  }
 
-// Close triggers
-document.getElementById('authClose').addEventListener('click', closeModal);
-overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  function setTab(name) {
+    $$('.auth-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.tab === name);
+    });
+    $$('.auth-panel').forEach(panel => {
+      panel.classList.toggle('active', panel.id === 'panel-' + name);
+    });
+  }
 
-// In-modal switches
-document.getElementById('switchToSignup').addEventListener('click', () => setTab('signup'));
-document.getElementById('switchToLogin').addEventListener('click',  () => setTab('login'));
+  function openModal(tab = 'login') {
+    if (!overlay) return;
+    overlay.classList.add('open', 'active', 'show');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('auth-open');
+    closeMobileMenu();
+    setTab(tab);
+  }
 
-// Tab switching
-function setTab(name) {
-  document.querySelectorAll('.auth-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.tab === name);
-  });
-  document.querySelectorAll('.auth-panel').forEach(p => {
-    p.classList.toggle('active', p.id === 'panel-' + name);
-  });
-}
-document.querySelectorAll('.auth-tab').forEach(t => {
-  t.addEventListener('click', () => setTab(t.dataset.tab));
-});
+  function closeModal() {
+    if (!overlay) return;
+    overlay.classList.remove('open', 'active', 'show');
+    document.body.style.overflow = '';
+    document.body.classList.remove('auth-open');
+  }
 
-// Password strength meter
-const pwInput = document.getElementById('signupPassword');
-if (pwInput) {
-  pwInput.addEventListener('input', () => {
-    const v = pwInput.value;
-    const score = [v.length >= 8, /[A-Z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
-    const cls = score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong';
-    ['s1','s2','s3','s4'].forEach((id, i) => {
-      const bar = document.getElementById(id);
-      bar.className = 'strength-bar';
-      if (i < score) bar.classList.add(cls);
+  /* Hamburger */
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('open');
+      mobileMenu.classList.toggle('active');
+      document.body.classList.toggle('menu-open');
+    });
+  }
+
+  if (mobileMenu) {
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMobileMenu);
+    });
+  }
+
+  /* Sign up / Create Account buttons now open the separate signup page */
+  ['#openSignup', '#openSignupMobile', '#openSignupCta'].forEach(selector => {
+    const btn = $(selector);
+    if (btn) btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      goSignup();
     });
   });
-}
 
-/* ==========================================================
-   SCROLL REVEAL
-========================================================== */
-const reveals = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
+  /* Login buttons open modal if present */
+  ['#openLogin', '#openLoginMobile'].forEach(selector => {
+    const btn = $(selector);
+    if (btn) btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('login');
+    });
+  });
+
+  const closeBtn = $('#authClose');
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (overlay) overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      closeMobileMenu();
     }
   });
-}, { threshold: 0.1 });
-reveals.forEach(el => revealObserver.observe(el));
 
-/* ==========================================================
-   HERO COUNTER ANIMATION
-========================================================== */
-function animateCount(el, target, prefix='', suffix='') {
-  const isFloat = target.includes('.');
-  const num = parseFloat(target.replace(/[^0-9.]/g,''));
-  const dur = 2000;
-  const start = performance.now();
-  function step(now) {
-    const t = Math.min((now - start) / dur, 1);
-    const ease = 1 - Math.pow(1 - t, 3);
-    const val = num * ease;
-    el.textContent = prefix + (isFloat ? val.toFixed(1) : Math.floor(val)) + suffix;
-    if (t < 1) requestAnimationFrame(step);
-    else el.textContent = prefix + target + suffix;
-  }
-  requestAnimationFrame(step);
-}
+  /* Modal tab and small switch buttons */
+  $$('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (tab.dataset.tab === 'signup') goSignup();
+      else setTab(tab.dataset.tab);
+    });
+  });
 
-const statNums = document.querySelectorAll('.hero-stat-num');
-let counted = false;
-const heroObserver = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting && !counted) {
-    counted = true;
-    const targets = ['2.4M', '$4.2M', '128', '38'];
-    const prefixes = ['', '$', '', ''];
-    const suffixes = ['M', '', '', ''];
-    const cores = ['2.4', '4.2', '128', '38'];
-    statNums.forEach((el, i) => {
-      animateCount(el, cores[i], prefixes[i], suffixes[i]);
+  const switchToSignup = $('#switchToSignup');
+  if (switchToSignup) switchToSignup.addEventListener('click', (e) => {
+    e.preventDefault();
+    goSignup();
+  });
+
+  const switchToLogin = $('#switchToLogin');
+  if (switchToLogin) switchToLogin.addEventListener('click', (e) => {
+    e.preventDefault();
+    setTab('login');
+  });
+
+  /* Password strength meter */
+  const pwInput = $('#signupPassword');
+  if (pwInput) {
+    pwInput.addEventListener('input', () => {
+      const v = pwInput.value;
+      const score = [v.length >= 8, /[A-Z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
+      const cls = score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong';
+      ['s1','s2','s3','s4'].forEach((id, i) => {
+        const bar = document.getElementById(id);
+        if (!bar) return;
+        bar.className = 'strength-bar';
+        if (i < score) bar.classList.add(cls, 'active');
+      });
     });
   }
-}, { threshold: 0.5 });
-if (statNums[0]) heroObserver.observe(statNums[0]);
 
-/* ==========================================================
-   SCHEDULE TABS
-========================================================== */
-const tabs = document.querySelectorAll('.schedule-tab');
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
+  /* Auth submit buttons */
+  $$('.auth-submit').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      const panel = button.closest('.auth-panel');
+      const isSignup = panel && panel.id === 'panel-signup';
+      if (isSignup) goSignup();
+      else {
+        alert('Logged in successfully!');
+        closeModal();
+      }
+    });
   });
-});
 
-/* ==========================================================
-   NAV ACTIVE STATE ON SCROLL
-========================================================== */
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-links a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => {
-    if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  /* Demo links/buttons that were previously empty */
+  const forgot = $('.auth-forgot');
+  if (forgot) forgot.addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('Password reset link will be sent to your email.');
   });
-  navLinks.forEach(a => {
-    a.style.color = a.getAttribute('href') === '#' + current ? 'var(--cyan)' : '';
+
+  $$('.auth-social-btn').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert(button.textContent.trim() + ' login coming soon!');
+    });
   });
-});
 
+  /* Newsletter form fix */
+  $$('.newsletter-form').forEach(form => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Thank you for subscribing!');
+      form.reset();
+    });
+  });
 
-/* Active link for separate pages */
-const currentPage = location.pathname.split('/').pop() || 'index.html';
-document.querySelectorAll('.nav-links a, .mobile-menu a').forEach(link => {
-  const href = link.getAttribute('href');
-  if (href === currentPage) link.classList.add('active');
+  /* Reveal animations */
+  const reveals = $$('.reveal');
+  if ('IntersectionObserver' in window && reveals.length) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => revealObserver.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add('visible'));
+  }
+
+  /* Active link for separate pages */
+  const currentPage = location.pathname.split('/').pop() || 'index.html';
+  $$('.nav-links a, .mobile-menu a').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href === currentPage) link.classList.add('active');
+  });
 });
